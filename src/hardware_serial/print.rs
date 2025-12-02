@@ -19,7 +19,7 @@ pub trait Print {
 
     #[inline(never)]
     fn write_number(&mut self, mut n: u32) -> usize {
-        let mut arr = [0u8; 8];
+        let mut arr = [0u8; 10];
 
         for i in arr.iter_mut().rev() {
             *i = (n % 10) as u8 + b'0';

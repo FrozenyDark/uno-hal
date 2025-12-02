@@ -25,8 +25,11 @@ pub(super) static mut SERIAL_WORKER: HardwareSerialWorker = HardwareSerialWorker
 pub struct HardwareSerialWorker {
     written: bool,
 
+    #[allow(dead_code)]
     rx_buffer_head: VolatileCell<u8>,
+    #[allow(dead_code)]
     rx_buffer_tail: VolatileCell<u8>,
+    #[allow(dead_code)]
     rx_buffer: [u8; SERIAL_RX_BUFFER_SIZE as usize],
 
     tx_buffer_head: VolatileCell<u8>,
