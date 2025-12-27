@@ -3,25 +3,25 @@ pub trait Print {
     fn write_c(&mut self, c: u8) -> usize;
 
     #[inline]
-    fn write_buffer(&mut self, buffer: &[u8]) -> usize {
-        buffer.iter().fold(0, |acc, &x| acc + self.write_c(x))
+    fn write_iter<'a, T: Iterator<Item = &'a u8>>(&mut self, iter: T) -> usize {
+        iter.fold(0, |acc, &x| acc + self.write_c(x))
     }
 
     #[inline]
     fn write(&mut self, s: &str) -> usize {
-        self.write_buffer(s.as_bytes())
+        self.write_iter(s.as_bytes().iter())
     }
 
     #[inline]
     fn writeln(&mut self, data: &str) -> usize {
-        self.write(data) + self.write_c(b'\n')
+        self.write_iter(data.as_bytes().iter().chain(b"\n"))
     }
 
     #[inline(never)]
     fn write_number(&mut self, mut n: u32) -> usize {
         let mut arr = [0u8; 10];
 
-        for i in arr.iter_mut().rev() {
+        for i in arr.iter_mut() {
             *i = (n % 10) as u8 + b'0';
             n /= 10;
 
@@ -30,7 +30,7 @@ pub trait Print {
             }
         }
 
-        self.write_buffer(&arr)
+        self.write_iter(arr.iter().rev())
     }
 
     #[inline(never)]
