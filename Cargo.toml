@@ -1,3 +1,7 @@
+[workspace]
+members = ["libraries/*"]
+resolver = "2"
+
 [package]
 name = "uno-hal"
 version = "0.1.0"
@@ -10,6 +14,7 @@ test = false
 bench = false
 
 [dependencies]
+uno-hal-macro = { path = "./libraries/uno-hal-macro" }
 
 [profile.dev]
 panic = "abort"

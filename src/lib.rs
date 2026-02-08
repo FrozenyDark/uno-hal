@@ -15,3 +15,4 @@ pub mod time;
 pub mod volatile_cell;
 
 pub use init::init;
+pub use uno_hal_macro::entry;

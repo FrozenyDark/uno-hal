@@ -10,8 +10,8 @@ use uno_hal::{
     time::delay,
 };
 
-#[export_name = "main"]
-extern "C" fn main() -> ! {
+#[uno_hal_macro::entry]
+fn main() -> ! {
     uno_hal::init();
 
     let pin: u8 = 13;
