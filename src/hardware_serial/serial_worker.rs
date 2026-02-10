@@ -1,7 +1,7 @@
-use crate::{
+use crate::volatile_cell::VolatileCell;
+use uno_hal_registers::{
     atomic_block,
     registers::{interrupt::SREG, usart::*, Register, F_CPU},
-    volatile_cell::VolatileCell,
 };
 
 const SERIAL_8N1: u8 = 0x06;

@@ -8,7 +8,6 @@ pub mod interrupt;
 mod register;
 pub mod timers;
 pub mod usart;
-mod vectors;
 
 pub use constants::*;
 pub use register::*;

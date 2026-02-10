@@ -1,4 +1,4 @@
-use crate::registers::timers::*;
+use uno_hal_registers::registers::timers::*;
 
 #[allow(clippy::enum_variant_names)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

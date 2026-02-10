@@ -1,4 +1,4 @@
-use crate::registers::{digital::*, Register, RegisterCell};
+use uno_hal_registers::registers::{digital::*, Register, RegisterCell};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]

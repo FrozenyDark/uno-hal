@@ -1,18 +1,14 @@
 #![no_std]
 #![no_main]
-#![feature(asm_experimental_arch)]
-#![feature(abi_avr_interrupt)]
-#![allow(static_mut_refs)]
-#![allow(clippy::missing_safety_doc)]
 
 use uno_hal::{
     pins::{digital_write, pin_mode, Mode},
     time::delay,
 };
 
-#[uno_hal_macro::entry]
+#[uno_hal::entry]
 fn main() -> ! {
-    uno_hal::init();
+    uno_hal::init!();
 
     let pin: u8 = 13;
     pin_mode(pin, Mode::Output).unwrap();

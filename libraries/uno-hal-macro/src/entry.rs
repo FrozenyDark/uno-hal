@@ -12,14 +12,24 @@ pub(crate) fn entry_impl(_args: TokenStream, input: TokenStream) -> TokenStream 
     }
 
     func.sig.ident = Ident::new(
-        &format!("__entry_point_{}__", func.sig.ident),
+        &format!("__entry_point_{}", func.sig.ident),
         proc_macro2::Span::call_site(),
     );
+
+    let ident = func.sig.ident.clone();
+
+    let caller = Ident::new(&format!("{ident}_caller"), proc_macro2::Span::call_site());
 
     quote!(
         #[doc(hidden)]
         #[unsafe(export_name = "main")]
-        unsafe extern "C" #func
+        unsafe extern "C" fn #caller() {
+            #ident()
+        }
+
+        #[doc(hidden)]
+        #[inline(always)]
+        #func
     )
     .into()
 }
@@ -33,7 +43,7 @@ fn check_signature(func: &ItemFn) -> Result<(), Error> {
         && func.sig.generics.where_clause.is_none() // No `where` clause
         && func.sig.variadic.is_none() // No variadics (`...` arguments)
         && match func.sig.output {
-            ReturnType::Type(_, ref ty) => matches!(**ty, Type::Never(_)), // Return type is `!`
+            ReturnType::Type(_, ref ty) => matches!(**ty, Type::Never(..)), // Return type is `!`
             _ => false,
         };
 

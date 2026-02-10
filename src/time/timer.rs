@@ -1,4 +1,4 @@
-use crate::{registers::F_CPU, TIMER0_OVF_vect};
+use uno_hal_registers::registers::F_CPU;
 
 pub const fn clock_cycles_per_microsecond() -> u32 {
     F_CPU / 1000000u32
@@ -18,9 +18,8 @@ pub static mut TIMER0_OVERFLOW_COUNT: u32 = 0;
 pub static mut TIMER0_MILLIS: u32 = 0;
 pub static mut TIMER0_FRACT: u32 = 0;
 
-#[allow(non_snake_case)]
-#[export_name = TIMER0_OVF_vect!()]
-extern "avr-interrupt" fn TIMER0_OVF() {
+#[uno_hal_macro::interrupt(atmega328p)]
+fn TIMER0_OVF() {
     let mut m = unsafe { TIMER0_MILLIS };
     let mut f = unsafe { TIMER0_FRACT };
 

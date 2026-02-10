@@ -1,5 +1,5 @@
 use super::timer::{clock_cycles_per_microsecond, TIMER0_MILLIS, TIMER0_OVERFLOW_COUNT};
-use crate::{
+use uno_hal_registers::{
     atomic_block,
     registers::timers::{TCNT0, TIFR0},
 };

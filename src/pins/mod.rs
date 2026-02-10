@@ -3,12 +3,12 @@ mod mode;
 mod port;
 mod timer;
 
-use crate::{
+use crate::pins::{port::Port, timer::Timer};
+use common::*;
+use uno_hal_registers::{
     atomic_block,
-    pins::{port::Port, timer::Timer},
     registers::{analog::*, Register, ANALOG_REFERENCE},
 };
-use common::*;
 
 pub use mode::*;
 
