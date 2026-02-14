@@ -13,27 +13,10 @@ pub(crate) fn interrupt_impl(args: TokenStream, input: TokenStream) -> TokenStre
         return x.to_compile_error().into();
     }
 
-    let chip = match get_chip_name(args) {
+    let vector = match get_vector(args, &func.sig.ident.to_string()) {
         Ok(x) => x,
         Err(e) => return e.into_compile_error().into(),
     };
-
-    let intr_name = func.sig.ident.clone().to_string();
-
-    let Some(vector) = vectors::get_vector_id(&chip, &intr_name) else {
-        return Error::new(
-            proc_macro2::Span::call_site(),
-            format!("Unknown chip `{chip}` or interrupt `{intr_name}`"),
-        )
-        .into_compile_error()
-        .into();
-    };
-
-    let vector = Ident::new(
-        &format!("__vector_{vector}"),
-        proc_macro2::Span::call_site(),
-    )
-    .to_string();
 
     func.sig.ident = Ident::new(
         &format!("__interrupt_{}", func.sig.ident),
@@ -103,4 +86,21 @@ fn check_signature(func: &ItemFn) -> Result<(), Error> {
     } else {
         Ok(())
     }
+}
+
+fn get_vector(args: TokenStream, ident: &String) -> Result<String, Error> {
+    let chip = get_chip_name(args)?;
+
+    let Some(vector) = vectors::get_vector_id(&chip, ident) else {
+        return Err(Error::new(
+            proc_macro2::Span::call_site(),
+            format!("Unknown chip `{chip}` or interrupt `{ident}`"),
+        ));
+    };
+
+    Ok(Ident::new(
+        &format!("__vector_{vector}"),
+        proc_macro2::Span::call_site(),
+    )
+    .to_string())
 }
