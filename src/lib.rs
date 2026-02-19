@@ -10,5 +10,5 @@ pub mod pins;
 pub mod time;
 pub mod volatile_cell;
 
-pub use uno_hal_macro::entry;
+pub use uno_hal_macro::{entry, interrupt};
 pub use uno_hal_registers::init;

@@ -18,7 +18,7 @@ pub static mut TIMER0_OVERFLOW_COUNT: u32 = 0;
 pub static mut TIMER0_MILLIS: u32 = 0;
 pub static mut TIMER0_FRACT: u32 = 0;
 
-#[uno_hal_macro::interrupt(atmega328p)]
+#[crate::interrupt(atmega328p)]
 fn TIMER0_OVF() {
     let mut m = unsafe { TIMER0_MILLIS };
     let mut f = unsafe { TIMER0_FRACT };
