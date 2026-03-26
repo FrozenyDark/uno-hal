@@ -55,22 +55,24 @@ impl HardwareSerialWorker {
 
     pub(super) fn begin(&self, baud: u32) {
         let mut baud_setting = ((F_CPU / 4 / baud - 1) / 2) as u16;
-        UCSRA.write(1 << U2X0);
+        unsafe { UCSRA.write(1 << U2X0) };
 
         if ((F_CPU == 16000000) && (baud == 57600)) || (baud_setting > 4095) {
-            UCSRA.write(0);
+            unsafe { UCSRA.write(0) };
             baud_setting = ((F_CPU / 8 / baud - 1) / 2) as u16;
         }
 
-        UBRRH.write((baud_setting >> 8) as u8);
-        UBRRL.write(baud_setting as u8);
+        unsafe {
+            UBRRH.write((baud_setting >> 8) as u8);
+            UBRRL.write(baud_setting as u8);
 
-        UCSRC.write(SERIAL_8N1);
+            UCSRC.write(SERIAL_8N1);
 
-        UCSRB.rxen0.set();
-        UCSRB.txen0.set();
-        UCSRB.rxcie0.set();
-        UCSRB.udrie0.clear();
+            UCSRB.rxen0.set();
+            UCSRB.txen0.set();
+            UCSRB.rxcie0.set();
+            UCSRB.udrie0.clear();
+        }
     }
 
     #[inline(never)]
@@ -81,8 +83,10 @@ impl HardwareSerialWorker {
 
         self.written = true;
 
-        if self.tx_buffer_head.read() == self.tx_buffer_tail.read() && UCSRA.udre0.is_set() {
-            atomic_block!({
+        if self.tx_buffer_head.read() == self.tx_buffer_tail.read()
+            && unsafe { UCSRA.udre0.is_set() }
+        {
+            atomic_block!(unsafe {
                 UDR.write(c);
                 UCSRA.update(|x| (x & ((1 << U2X0) | (1 << MPCM0))) | (1 << TXC0));
             });
@@ -91,8 +95,8 @@ impl HardwareSerialWorker {
         let i = (self.tx_buffer_head.read() + 1) % SERIAL_TX_BUFFER_SIZE;
 
         while i == self.tx_buffer_tail.read() {
-            if SREG.sreg_i.is_clear() {
-                if UCSRA.udre0.is_set() {
+            if unsafe { SREG.sreg_i.is_clear() } {
+                if unsafe { UCSRA.udre0.is_set() } {
                     self.tx_udr_empty_irq();
                 }
             } else {
@@ -103,7 +107,7 @@ impl HardwareSerialWorker {
         let head = self.tx_buffer_head.read() as usize;
         self.tx_buffer[head] = c;
 
-        atomic_block!({
+        atomic_block!(unsafe {
             self.tx_buffer_head.write(i);
             UCSRB.udrie0.set();
         });
@@ -117,9 +121,11 @@ impl HardwareSerialWorker {
             return;
         }
 
-        while UCSRB.udrie0.is_set() || UCSRA.txc0.is_clear() {
-            if SREG.sreg_i.is_clear() && UCSRB.udrie0.is_set() && UCSRA.udre0.is_set() {
-                self.tx_udr_empty_irq();
+        unsafe {
+            while UCSRB.udrie0.is_set() || UCSRA.txc0.is_clear() {
+                if SREG.sreg_i.is_clear() && UCSRB.udrie0.is_set() && UCSRA.udre0.is_set() {
+                    self.tx_udr_empty_irq();
+                }
             }
         }
     }
@@ -147,12 +153,12 @@ impl HardwareSerialWorker {
         self.tx_buffer_tail
             .update(|x| (x + 1) % SERIAL_TX_BUFFER_SIZE);
 
-        UDR.write(c);
+        unsafe { UDR.write(c) };
 
-        UCSRA.update(|x| (x & ((1 << U2X0) | (1 << MPCM0))) | (1 << TXC0));
+        unsafe { UCSRA.update(|x| (x & ((1 << U2X0) | (1 << MPCM0))) | (1 << TXC0)) };
 
         if self.tx_buffer_head.read() == self.tx_buffer_tail.read() {
-            UCSRB.udrie0.clear();
+            unsafe { UCSRB.udrie0.clear() };
         }
     }
 }

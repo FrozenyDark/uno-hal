@@ -5,11 +5,11 @@ use uno_hal_registers::{
 };
 
 #[inline]
-pub fn millis() -> u32 {
+pub unsafe fn millis() -> u32 {
     atomic_block! { unsafe { TIMER0_MILLIS } }
 }
 
-pub fn micros() -> u32 {
+pub unsafe fn micros() -> u32 {
     let mut m: u32;
     let t: u8;
 

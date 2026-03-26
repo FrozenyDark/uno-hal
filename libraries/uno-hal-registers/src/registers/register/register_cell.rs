@@ -18,22 +18,22 @@ impl RegisterCell<u8> {
     }
 
     #[inline]
-    pub fn set(&self, bit: u8) {
+    pub unsafe fn set(&self, bit: u8) {
         self.update(|x| x | (1 << bit));
     }
 
     #[inline]
-    pub fn clear(&self, bit: u8) {
+    pub unsafe fn clear(&self, bit: u8) {
         self.update(|x| x & !(1 << bit));
     }
 
     #[inline]
-    pub fn is_set(&self, bit: u8) -> bool {
+    pub unsafe fn is_set(&self, bit: u8) -> bool {
         (self.read() & (1 << bit)) != 0
     }
 
     #[inline]
-    pub fn is_clear(&self, bit: u8) -> bool {
+    pub unsafe fn is_clear(&self, bit: u8) -> bool {
         !self.is_set(bit)
     }
 }
@@ -54,17 +54,17 @@ impl RegisterCell<u16> {
 
 impl<T> RegisterCell<T> {
     #[inline]
-    pub fn read(&self) -> T {
-        unsafe { self.cell.read_volatile() }
+    pub unsafe fn read(&self) -> T {
+        self.cell.read_volatile()
     }
 
     #[inline]
-    pub fn write(&self, value: T) {
-        unsafe { self.cell.write_volatile(value) };
+    pub unsafe fn write(&self, value: T) {
+        self.cell.write_volatile(value);
     }
 
     #[inline]
-    pub fn update<F>(&self, f: F)
+    pub unsafe fn update<F>(&self, f: F)
     where
         F: FnOnce(T) -> T,
     {

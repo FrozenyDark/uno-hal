@@ -68,7 +68,7 @@ macro_rules! INIT_REG {
         pub const $name: $name = $name {};
     };
 
-    ($name:tt: $type:tt($addr:literal), $($bit_name:tt = $bit:literal),+) => {
+    ($name:tt: $type:tt($addr:literal), $($bit_name:tt = $bit:literal),+$(,)?) => {
         #[allow(clippy::upper_case_acronyms)]
         pub struct $name {
             $(

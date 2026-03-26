@@ -12,13 +12,13 @@ pub unsafe fn disable() {
 
 #[macro_export]
 macro_rules! atomic_block {
-    ($($f:stmt)*) => {{
+    ($($f:tt)*) => {{
         use $crate::{interrupt::disable, registers::{interrupt::SREG, Register}};
 
-        let __old_sreg = SREG.read();
+        let __old_sreg = unsafe {SREG.read()};
         unsafe { disable() };
         let __res = { $($f)* };
-        SREG.write(__old_sreg);
+        unsafe {SREG.write(__old_sreg)};
 
         __res
     }};

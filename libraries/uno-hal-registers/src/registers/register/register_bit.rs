@@ -25,22 +25,22 @@ where
     }
 
     #[inline]
-    pub fn set(&self) {
+    pub unsafe fn set(&self) {
         T::REGISTER.set(BIT);
     }
 
     #[inline]
-    pub fn clear(&self) {
+    pub unsafe fn clear(&self) {
         T::REGISTER.clear(BIT);
     }
 
     #[inline]
-    pub fn is_set(&self) -> bool {
+    pub unsafe fn is_set(&self) -> bool {
         T::REGISTER.is_set(BIT)
     }
 
     #[inline]
-    pub fn is_clear(&self) -> bool {
+    pub unsafe fn is_clear(&self) -> bool {
         T::REGISTER.is_clear(BIT)
     }
 }

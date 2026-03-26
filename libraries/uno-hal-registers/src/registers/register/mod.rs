@@ -8,17 +8,17 @@ pub trait Register<T> {
     const REGISTER: RegisterCell<T>;
 
     #[inline]
-    fn read(&self) -> T {
+    unsafe fn read(&self) -> T {
         Self::REGISTER.read()
     }
 
     #[inline]
-    fn write(&self, value: T) {
+    unsafe fn write(&self, value: T) {
         Self::REGISTER.write(value);
     }
 
     #[inline]
-    fn update<F>(&self, f: F)
+    unsafe fn update<F>(&self, f: F)
     where
         F: FnOnce(T) -> T,
     {

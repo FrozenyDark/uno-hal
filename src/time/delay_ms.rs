@@ -7,7 +7,7 @@ pub struct DelayMs {}
 
 impl DelayMs {
     #[allow(dead_code)]
-    pub fn delay_legacy(mut ms: u32) {
+    pub unsafe fn delay_legacy(mut ms: u32) {
         let mut start = micros();
 
         while ms > 0 {

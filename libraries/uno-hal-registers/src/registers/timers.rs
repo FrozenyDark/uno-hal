@@ -153,3 +153,103 @@ crate::INIT_REG!(
     ocie2a = 1,
     ocie2b = 2
 );
+
+crate::INIT_REG!(
+    OCR0A: io8(0x27),
+    ocr0a_0 = 0,
+    ocr0a_1 = 1,
+    ocr0a_2 = 2,
+    ocr0a_3 = 3,
+    ocr0a_4 = 4,
+    ocr0a_5 = 5,
+    ocr0a_6 = 6,
+    ocr0a_7 = 7
+);
+
+crate::INIT_REG!(
+    OCR0B: io8(0x28),
+    ocr0b_0 = 0,
+    ocr0b_1 = 1,
+    ocr0b_2 = 2,
+    ocr0b_3 = 3,
+    ocr0b_4 = 4,
+    ocr0b_5 = 5,
+    ocr0b_6 = 6,
+    ocr0b_7 = 7
+);
+
+crate::INIT_REG!(OCR1A: mem16(0x88));
+
+crate::INIT_REG!(
+    OCR1AL: mem8(0x88),
+    ocr1al0 = 0,
+    ocr1al1 = 1,
+    ocr1al2 = 2,
+    ocr1al3 = 3,
+    ocr1al4 = 4,
+    ocr1al5 = 5,
+    ocr1al6 = 6,
+    ocr1al7 = 7
+);
+
+crate::INIT_REG!(
+    OCR1AH: mem8(0x89),
+    ocr1ah0 = 0,
+    ocr1ah1 = 1,
+    ocr1ah2 = 2,
+    ocr1ah3 = 3,
+    ocr1ah4 = 4,
+    ocr1ah5 = 5,
+    ocr1ah6 = 6,
+    ocr1ah7 = 7
+);
+
+crate::INIT_REG!(OCR1B: mem16(0x8A));
+
+crate::INIT_REG!(
+    OCR1BL: mem8(0x8A),
+    ocr1bl0 = 0,
+    ocr1bl1 = 1,
+    ocr1bl2 = 2,
+    ocr1bl3 = 3,
+    ocr1bl4 = 4,
+    ocr1bl5 = 5,
+    ocr1bl6 = 6,
+    ocr1bl7 = 7
+);
+
+crate::INIT_REG!(
+    OCR1BH: mem8(0x8B),
+    ocr1bh0 = 0,
+    ocr1bh1 = 1,
+    ocr1bh2 = 2,
+    ocr1bh3 = 3,
+    ocr1bh4 = 4,
+    ocr1bh5 = 5,
+    ocr1bh6 = 6,
+    ocr1bh7 = 7
+);
+
+crate::INIT_REG!(
+    OCR2A: mem8(0xB3),
+    ocr2a_0 = 0,
+    ocr2a_1 = 1,
+    ocr2a_2 = 2,
+    ocr2a_3 = 3,
+    ocr2a_4 = 4,
+    ocr2a_5 = 5,
+    ocr2a_6 = 6,
+    ocr2a_7 = 7
+);
+
+crate::INIT_REG!(
+    OCR2B: mem8(0xB4),
+    ocr2b_0 = 0,
+    ocr2b_1 = 1,
+    ocr2b_2 = 2,
+    ocr2b_3 = 3,
+    ocr2b_4 = 4,
+    ocr2b_5 = 5,
+    ocr2b_6 = 6,
+    ocr2b_7 = 7
+);

@@ -9,7 +9,7 @@ pub use millis::*;
 use crate::time::{delay_ms::DelayMs, delay_us::DelayUs};
 
 #[inline]
-pub fn delay_legacy(ms: u32) {
+pub unsafe fn delay_legacy(ms: u32) {
     DelayMs::delay_legacy(ms);
 }
 
