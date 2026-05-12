@@ -8,6 +8,7 @@ use crate::{
 pub mod addr;
 pub mod analog;
 pub mod bit;
+pub mod delay_loop;
 pub mod gpio;
 mod macros;
 pub mod status;

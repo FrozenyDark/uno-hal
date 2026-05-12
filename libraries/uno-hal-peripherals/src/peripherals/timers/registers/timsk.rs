@@ -8,54 +8,54 @@ use crate::{
 
 pub struct Timsk0 {
     /// Timer/Counter Output Overflow Interrupt Enable
-    pub toie_: Bit<RegRW<u8>, 0>,
+    pub toie0: Bit<RegRW<u8>, 0>,
     /// Timer/Counter Output Compare Match A Interrupt Enable
-    pub ocie_a: Bit<RegRW<u8>, 1>,
+    pub ocie0a: Bit<RegRW<u8>, 1>,
     /// Timer/Counter Output Compare Match B Interrupt Enable
-    pub ocie_b: Bit<RegRW<u8>, 2>,
+    pub ocie0b: Bit<RegRW<u8>, 2>,
     _p: PhantomData<*const ()>,
 }
 
 pub struct Timsk1 {
     /// Timer/Counter Output Overflow Interrupt Enable
-    pub toie_: Bit<RegRW<u8>, 0>,
+    pub toie1: Bit<RegRW<u8>, 0>,
     /// Timer/Counter Output Compare Match A Interrupt Enable
-    pub ocie_a: Bit<RegRW<u8>, 1>,
+    pub ocie1a: Bit<RegRW<u8>, 1>,
     /// Timer/Counter Output Compare Match B Interrupt Enable
-    pub ocie_b: Bit<RegRW<u8>, 2>,
+    pub ocie1b: Bit<RegRW<u8>, 2>,
     _p: PhantomData<*const ()>,
 }
 
 pub struct Timsk2 {
     /// Timer/Counter Output Overflow Interrupt Enable
-    pub toie_: Bit<RegRW<u8>, 0>,
+    pub toie2: Bit<RegRW<u8>, 0>,
     /// Timer/Counter Output Compare Match A Interrupt Enable
-    pub ocie_a: Bit<RegRW<u8>, 1>,
+    pub ocie2a: Bit<RegRW<u8>, 1>,
     /// Timer/Counter Output Compare Match B Interrupt Enable
-    pub ocie_b: Bit<RegRW<u8>, 2>,
+    pub ocie2b: Bit<RegRW<u8>, 2>,
     _p: PhantomData<*const ()>,
 }
 
 init_register!(
     Timsk0: RegRW<u8> = new_mem8(0x6E) {
-        toie_,
-        ocie_a,
-        ocie_b
+        toie0,
+        ocie0a,
+        ocie0b
     }
 );
 
 init_register!(
     Timsk1: RegRW<u8> = new_mem8(0x6F) {
-        toie_,
-        ocie_a,
-        ocie_b
+        toie1,
+        ocie1a,
+        ocie1b
     }
 );
 
 init_register!(
     Timsk2: RegRW<u8> = new_mem8(0x70) {
-        toie_,
-        ocie_a,
-        ocie_b
+        toie2,
+        ocie2a,
+        ocie2b
     }
 );

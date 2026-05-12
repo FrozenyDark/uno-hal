@@ -11,9 +11,9 @@ pub struct Timer0 {
     pub tccr0b: Tccr0B,
     pub ocr0a: Ocr0A,
     pub ocr0b: Ocr0B,
-    pub tcnt: Tcnt0,
-    pub tifr: Tifr0,
-    pub timsk: Timsk0,
+    pub tcnt0: Tcnt0,
+    pub tifr0: Tifr0,
+    pub timsk0: Timsk0,
 }
 
 #[repr(u8)]
@@ -43,9 +43,9 @@ impl Timer0 {
             tccr0b: Tccr0B::new(),
             ocr0a: Ocr0A::new(),
             ocr0b: Ocr0B::new(),
-            tcnt: Tcnt0::new(),
-            tifr: Tifr0::new(),
-            timsk: Timsk0::new(),
+            tcnt0: Tcnt0::new(),
+            tifr0: Tifr0::new(),
+            timsk0: Timsk0::new(),
         }
     }
 
@@ -77,7 +77,7 @@ impl Timer0 {
 
     #[inline]
     pub fn enable_overflow_interrupt(&mut self) {
-        unsafe { self.timsk.toie_.set() };
+        unsafe { self.timsk0.toie0.set() };
     }
 
     #[inline]

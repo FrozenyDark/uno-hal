@@ -1,5 +1,0 @@
-[package]
-name = "uno-hal-registers"
-version = "0.1.0"
-authors = ["FrozenyDark <dmitriy.steshenko@gmail.com>"]
-edition = "2021"

@@ -11,9 +11,9 @@ pub struct Timer2 {
     pub tccr2b: Tccr2B,
     pub ocr2a: Ocr2A,
     pub ocr2b: Ocr2B,
-    pub tcnt: Tcnt2,
-    pub tifr: Tifr2,
-    pub timsk: Timsk2,
+    pub tcnt2: Tcnt2,
+    pub tifr2: Tifr2,
+    pub timsk2: Timsk2,
 }
 
 #[repr(u8)]
@@ -43,9 +43,9 @@ impl Timer2 {
             tccr2b: Tccr2B::new(),
             ocr2a: Ocr2A::new(),
             ocr2b: Ocr2B::new(),
-            tcnt: Tcnt2::new(),
-            tifr: Tifr2::new(),
-            timsk: Timsk2::new(),
+            tcnt2: Tcnt2::new(),
+            tifr2: Tifr2::new(),
+            timsk2: Timsk2::new(),
         }
     }
 

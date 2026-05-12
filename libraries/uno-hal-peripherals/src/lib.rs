@@ -5,4 +5,4 @@
 mod peripherals;
 
 pub use peripherals::*;
-pub const F_CPU: u32 = 16_000_000;
+pub const F_CPU: u32 = 16_000_000; // 16MHz

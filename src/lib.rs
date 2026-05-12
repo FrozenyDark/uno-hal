@@ -4,12 +4,11 @@
 #![allow(static_mut_refs)]
 #![allow(clippy::missing_safety_doc)] // TODO: Remove this
 
-pub mod hardware_serial;
+mod delay;
 pub mod panic;
 pub mod peripherals;
-pub mod pins;
-pub mod time;
 pub mod volatile_cell;
 
+pub use delay::*;
 pub use uno_hal_macro::{entry, interrupt};
-pub use uno_hal_registers::init;
+pub use uno_hal_peripherals::Peripherals;

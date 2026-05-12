@@ -1,6 +1,6 @@
 use core::marker::PhantomData;
 
-use crate::time::delay_loop::_delay_loop_2;
+use uno_hal_peripherals::delay_loop::_delay_loop_2;
 
 pub struct DelayUs<T> {
     _marker: PhantomData<T>,
