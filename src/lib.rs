@@ -6,6 +6,7 @@
 
 pub mod hardware_serial;
 pub mod panic;
+pub mod peripherals;
 pub mod pins;
 pub mod time;
 pub mod volatile_cell;

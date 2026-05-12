@@ -1,0 +1,5 @@
+[package]
+name = "uno-hal-peripherals"
+version = "0.1.0"
+authors = ["FrozenyDark <dmitriy.steshenko@gmail.com>"]
+edition = "2021"

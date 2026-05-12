@@ -16,6 +16,7 @@ bench = false
 [dependencies]
 uno-hal-macro = { path = "./libraries/uno-hal-macro" }
 uno-hal-registers = { path = "./libraries/uno-hal-registers" }
+uno-hal-peripherals = { path = "./libraries/uno-hal-peripherals" }
 
 [profile.dev]
 panic = "abort"
