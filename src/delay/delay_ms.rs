@@ -6,6 +6,7 @@ const MAX_MS: u32 = u32::MAX / US_PER_MS;
 pub struct DelayMs {}
 
 impl DelayMs {
+    #[inline(never)]
     pub fn delay(mut ms: u32) {
         while ms > MAX_MS {
             ms -= MAX_MS;

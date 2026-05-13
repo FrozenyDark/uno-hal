@@ -21,6 +21,7 @@ pub struct UsartWorker {
 }
 
 impl UsartWorker {
+    #[inline]
     pub(super) fn create(usart: Usart0) {
         let worker = Self {
             written: false,
@@ -36,6 +37,7 @@ impl UsartWorker {
         unsafe { USART_WORKER.replace(worker) };
     }
 
+    #[inline]
     pub(super) fn begin(&mut self, baud: u32) {
         self.usart.set_baud(baud);
         self.usart.set_format();

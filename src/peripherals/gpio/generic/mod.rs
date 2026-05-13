@@ -1,4 +1,4 @@
-use uno_hal_peripherals::analog::Analog;
+use uno_hal_peripherals::{analog::Analog, gpio::pins::ErasedPin};
 
 mod analog;
 mod digital;
@@ -12,6 +12,8 @@ pub trait GenericPin {
 
     unsafe fn output_set(&mut self);
     unsafe fn output_clear(&mut self);
+
+    fn erase(self) -> ErasedPin;
 }
 
 pub trait GenericPinPWM: GenericPin {

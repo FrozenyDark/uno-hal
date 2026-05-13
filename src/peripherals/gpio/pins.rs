@@ -3,7 +3,7 @@ use core::marker::PhantomData;
 use crate::peripherals::gpio::{Floating, InputMode, Pin};
 use uno_hal_peripherals::gpio::{
     pins::*,
-    ports::{Port, PortB, PortC, PortD},
+    ports::{PortB, PortC, PortD},
 };
 
 type PinType<P> = Pin<InputMode<Floating>, P>;

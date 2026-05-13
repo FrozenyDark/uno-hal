@@ -1,9 +1,12 @@
-use crate::timers::registers::{
-    ocr::{Ocr1A, Ocr1B},
-    tccr::{Tccr1A, Tccr1B},
-    tcnt::Tcnt1,
-    tifr::Tifr1,
-    timsk::Timsk1,
+use crate::{
+    addr::RW8,
+    timers::registers::{
+        ocr::{Ocr1A, Ocr1B},
+        tccr::{Tccr1A, Tccr1B},
+        tcnt::Tcnt1,
+        tifr::Tifr1,
+        timsk::Timsk1,
+    },
 };
 
 pub struct Timer1 {
@@ -34,10 +37,10 @@ pub enum WGMode1 {
     PhaseCorrectPWM8 = 1, // Default
     PhaseCorrectPWM9 = 2,
     PhaseCorrectPWM10 = 3,
-    ClearTimerOnCompare = 4,
-    FastPWM8 = 5,
-    FastPWM9 = 6,
-    FastPWM10 = 7,
+    ClearTimerOnCompare = 8,
+    FastPWM8 = 9,
+    FastPWM9 = 10,
+    FastPWM10 = 11,
 }
 
 impl Timer1 {
@@ -63,9 +66,8 @@ impl Timer1 {
         let mask = setting as u8;
 
         unsafe {
-            self.tccr1a.wgm10.set_mask(mask);
-            self.tccr1a.wgm11.set_mask(mask);
-            self.tccr1b.wgm12.set_mask(mask << 1);
+            self.tccr1a.reg_mut().set_mask(mask & 3);
+            self.tccr1b.reg_mut().set_mask(mask & 8);
         }
     }
 
@@ -73,11 +75,7 @@ impl Timer1 {
     pub fn setup_clock(&mut self, setting: ClockSelect1) {
         let mask = setting as u8;
 
-        unsafe {
-            self.tccr1b.cs10.set_mask(mask);
-            self.tccr1b.cs11.set_mask(mask);
-            self.tccr1b.cs12.set_mask(mask);
-        }
+        unsafe { self.tccr1b.reg_mut().set_mask(mask) };
     }
 
     #[inline]

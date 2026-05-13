@@ -2,7 +2,7 @@ pub mod registers;
 
 use registers::*;
 
-use crate::addr::{RO, RW};
+use crate::addr::{RO, RW, RW8};
 
 pub const ANALOG_REFERENCE: u8 = 1; // DEFAULT
 
@@ -36,11 +36,7 @@ impl Analog {
     pub fn setup_prescaler(&mut self, setting: AnalogPrescaler) {
         let mask = setting as u8;
 
-        unsafe {
-            self.adcsra.adps2.set_mask(mask);
-            self.adcsra.adps1.set_mask(mask);
-            self.adcsra.adps0.set_mask(mask);
-        }
+        unsafe { self.adcsra.reg_mut().set_mask(mask) };
     }
 
     #[inline]

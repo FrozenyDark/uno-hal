@@ -1,6 +1,6 @@
 use core::marker::PhantomData;
 
-use uno_hal_peripherals::analog::Analog;
+use uno_hal_peripherals::{analog::Analog, gpio::pins::ErasedPin};
 
 use crate::peripherals::gpio::{
     generic::{GenericPin, GenericPinAnalog, GenericPinPWM},
@@ -42,6 +42,14 @@ impl<M: IOMode, P: GenericPin> Pin<M, P> {
             _state: PhantomData,
         }
     }
+
+    #[inline]
+    pub fn erase(self) -> Pin<M, ErasedPin> {
+        Pin {
+            pin: self.pin.erase(),
+            _state: self._state,
+        }
+    }
 }
 
 impl<S: InputState, P: GenericPin> Pin<InputMode<S>, P> {
@@ -58,13 +66,21 @@ impl<S: InputState, P: GenericPin> Pin<InputMode<S>, P> {
 
 impl<P: GenericPin> Pin<OutputMode, P> {
     #[inline]
+    pub fn set(&mut self, state: bool) {
+        match state {
+            true => unsafe { self.pin.output_set() },
+            false => unsafe { self.pin.output_clear() },
+        }
+    }
+
+    #[inline]
     pub fn set_high(&mut self) {
-        unsafe { self.pin.output_set() };
+        self.set(true);
     }
 
     #[inline]
     pub fn set_low(&mut self) {
-        unsafe { self.pin.output_clear() };
+        self.set(false);
     }
 }
 

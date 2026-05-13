@@ -7,6 +7,7 @@ use crate::delay::{delay_ms::DelayMs, delay_us::DelayUs};
 pub use millis::{get_ms, get_us};
 use uno_hal_peripherals::timers::Timer0;
 
+#[inline(never)]
 pub fn clock_ms_bg<F: FnMut()>(timer: &Timer0, mut ms: u32, mut f: F) {
     let mut start = get_us(timer);
 

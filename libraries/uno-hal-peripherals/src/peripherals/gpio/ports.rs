@@ -3,16 +3,6 @@ use crate::{
     peripherals::gpio::pins::*,
 };
 
-pub trait Port {
-    type Pins;
-
-    fn split(&self) -> Self::Pins;
-
-    fn read_reg(&self) -> &RegRO<u8>;
-    fn mode_reg(&mut self) -> &mut RegRW<u8>;
-    fn write_reg(&mut self) -> &mut RegRW<u8>;
-}
-
 pub struct PortDPins {
     pub pd0: PD0,
     pub pd1: PD1,
@@ -43,21 +33,39 @@ pub struct PortCPins {
 }
 
 pub struct PortD {
-    pind: RegRO<u8>,
-    ddrd: RegRW<u8>,
-    portd: RegRW<u8>,
+    /// Pin input register
+    pub pind: RegRO<u8>,
+    /// Pin mode register
+    pub ddrd: RegRW<u8>,
+    /// Pin output register
+    pub portd: RegRW<u8>,
 }
 
 pub struct PortB {
-    pinb: RegRO<u8>,
-    ddrb: RegRW<u8>,
-    portb: RegRW<u8>,
+    /// Pin input register
+    pub pinb: RegRO<u8>,
+    /// Pin mode register
+    pub ddrb: RegRW<u8>,
+    /// Pin output register
+    pub portb: RegRW<u8>,
 }
 
 pub struct PortC {
-    pinc: RegRO<u8>,
-    ddrc: RegRW<u8>,
-    portc: RegRW<u8>,
+    /// Pin input register
+    pub pinc: RegRO<u8>,
+    /// Pin mode register
+    pub ddrc: RegRW<u8>,
+    /// Pin output register
+    pub portc: RegRW<u8>,
+}
+
+pub struct ErasedPort {
+    /// Pin input register
+    pub pin: RegRO<u8>,
+    /// Pin mode register
+    pub ddr: RegRW<u8>,
+    /// Pin output register
+    pub port: RegRW<u8>,
 }
 
 impl PortD {
@@ -72,6 +80,27 @@ impl PortD {
     #[inline]
     pub unsafe fn take() -> Self {
         Self::new()
+    }
+
+    pub const fn split(&self) -> PortDPins {
+        PortDPins {
+            pd0: PD0::new(),
+            pd1: PD1::new(),
+            pd2: PD2::new(),
+            pd3: PD3::new(),
+            pd4: PD4::new(),
+            pd5: PD5::new(),
+            pd6: PD6::new(),
+            pd7: PD7::new(),
+        }
+    }
+
+    pub const fn erase(self) -> ErasedPort {
+        ErasedPort {
+            pin: self.pind,
+            ddr: self.ddrd,
+            port: self.portd,
+        }
     }
 }
 
@@ -88,6 +117,25 @@ impl PortB {
     pub unsafe fn take() -> Self {
         Self::new()
     }
+
+    pub const fn split(&self) -> PortBPins {
+        PortBPins {
+            pb0: PB0::new(),
+            pb1: PB1::new(),
+            pb2: PB2::new(),
+            pb3: PB3::new(),
+            pb4: PB4::new(),
+            pb5: PB5::new(),
+        }
+    }
+
+    pub const fn erase(self) -> ErasedPort {
+        ErasedPort {
+            pin: self.pinb,
+            ddr: self.ddrb,
+            port: self.portb,
+        }
+    }
 }
 
 impl PortC {
@@ -103,78 +151,9 @@ impl PortC {
     pub unsafe fn take() -> Self {
         Self::new()
     }
-}
 
-impl Port for PortD {
-    type Pins = PortDPins;
-
-    #[inline]
-    fn split(&self) -> Self::Pins {
-        Self::Pins {
-            pd0: PD0::new(),
-            pd1: PD1::new(),
-            pd2: PD2::new(),
-            pd3: PD3::new(),
-            pd4: PD4::new(),
-            pd5: PD5::new(),
-            pd6: PD6::new(),
-            pd7: PD7::new(),
-        }
-    }
-
-    #[inline]
-    fn read_reg(&self) -> &RegRO<u8> {
-        &self.pind
-    }
-
-    #[inline]
-    fn mode_reg(&mut self) -> &mut RegRW<u8> {
-        &mut self.ddrd
-    }
-
-    #[inline]
-    fn write_reg(&mut self) -> &mut RegRW<u8> {
-        &mut self.portd
-    }
-}
-
-impl Port for PortB {
-    type Pins = PortBPins;
-
-    #[inline]
-    fn split(&self) -> Self::Pins {
-        Self::Pins {
-            pb0: PB0::new(),
-            pb1: PB1::new(),
-            pb2: PB2::new(),
-            pb3: PB3::new(),
-            pb4: PB4::new(),
-            pb5: PB5::new(),
-        }
-    }
-
-    #[inline]
-    fn read_reg(&self) -> &RegRO<u8> {
-        &self.pinb
-    }
-
-    #[inline]
-    fn mode_reg(&mut self) -> &mut RegRW<u8> {
-        &mut self.ddrb
-    }
-
-    #[inline]
-    fn write_reg(&mut self) -> &mut RegRW<u8> {
-        &mut self.portb
-    }
-}
-
-impl Port for PortC {
-    type Pins = PortCPins;
-
-    #[inline]
-    fn split(&self) -> Self::Pins {
-        Self::Pins {
+    pub const fn split(&self) -> PortCPins {
+        PortCPins {
             pc0: PC0::new(),
             pc1: PC1::new(),
             pc2: PC2::new(),
@@ -184,18 +163,11 @@ impl Port for PortC {
         }
     }
 
-    #[inline]
-    fn read_reg(&self) -> &RegRO<u8> {
-        &self.pinc
-    }
-
-    #[inline]
-    fn mode_reg(&mut self) -> &mut RegRW<u8> {
-        &mut self.ddrc
-    }
-
-    #[inline]
-    fn write_reg(&mut self) -> &mut RegRW<u8> {
-        &mut self.portc
+    pub const fn erase(self) -> ErasedPort {
+        ErasedPort {
+            pin: self.pinc,
+            ddr: self.ddrc,
+            port: self.portc,
+        }
     }
 }

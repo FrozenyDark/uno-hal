@@ -1,8 +1,8 @@
-use crate::addr::{RO, RW};
+use crate::addr::{RO8, RW8};
 
-pub struct Bit<R: RO<u8>, const BIT: u8>(R);
+pub struct Bit<R: RO8, const BIT: u8>(R);
 
-impl<R: RO<u8>, const BIT: u8> Bit<R, BIT> {
+impl<R: RO8, const BIT: u8> Bit<R, BIT> {
     pub const fn new(reg: R) -> Self {
         Self(reg)
     }
@@ -11,9 +11,13 @@ impl<R: RO<u8>, const BIT: u8> Bit<R, BIT> {
         BIT
     }
 
+    pub const fn mask(&self) -> u8 {
+        1 << BIT
+    }
+
     #[inline]
     pub fn is_set(&self) -> bool {
-        (self.0.read() & (1 << BIT)) != 0
+        self.0.is_set(BIT)
     }
 
     #[inline]
@@ -22,15 +26,15 @@ impl<R: RO<u8>, const BIT: u8> Bit<R, BIT> {
     }
 }
 
-impl<R: RW<u8>, const BIT: u8> Bit<R, BIT> {
+impl<R: RW8, const BIT: u8> Bit<R, BIT> {
     #[inline]
     pub unsafe fn set(&mut self) {
-        self.0.update(|x| x | (1 << BIT));
+        self.0.set(BIT);
     }
 
     #[inline]
     pub unsafe fn clear(&mut self) {
-        self.0.update(|x| x & !(1 << BIT));
+        self.0.clear(BIT);
     }
 
     #[inline]
@@ -39,10 +43,5 @@ impl<R: RW<u8>, const BIT: u8> Bit<R, BIT> {
             true => self.set(),
             false => self.clear(),
         }
-    }
-
-    #[inline]
-    pub unsafe fn set_mask(&mut self, mask: u8) {
-        self.set_val((mask & (1 << BIT)) > 0);
     }
 }
