@@ -1,8 +1,10 @@
 mod interrupt;
+pub mod readable;
 mod worker;
 pub mod writable;
 
 use crate::peripherals::usart::{
+    readable::Readable,
     worker::{UsartWorker, USART_WORKER},
     writable::Writable,
 };
@@ -40,5 +42,22 @@ impl Writable for HwSerial {
     #[inline]
     fn available_for_write(&self) -> usize {
         unsafe { USART_WORKER.as_mut().unwrap().available_for_write() as usize }
+    }
+}
+
+impl Readable for HwSerial {
+    #[inline]
+    fn peek_c(&self) -> Option<u8> {
+        unsafe { USART_WORKER.as_mut().unwrap().peek() }
+    }
+
+    #[inline]
+    fn read_c(&self) -> Option<u8> {
+        unsafe { USART_WORKER.as_mut().unwrap().read() }
+    }
+
+    #[inline]
+    fn available(&self) -> usize {
+        unsafe { USART_WORKER.as_mut().unwrap().available() }
     }
 }

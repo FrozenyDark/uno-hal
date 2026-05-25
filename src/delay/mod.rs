@@ -1,10 +1,10 @@
 mod delay_ms;
 mod delay_us;
 mod interrupt;
-mod millis;
+mod runtime;
 
 use crate::delay::{delay_ms::DelayMs, delay_us::DelayUs};
-pub use millis::{get_ms, get_us};
+pub use runtime::{get_ms, get_us};
 use uno_hal_peripherals::timers::Timer0;
 
 #[inline(never)]

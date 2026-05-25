@@ -1,4 +1,3 @@
-#[allow(dead_code)]
 pub trait Writable {
     fn write_c(&mut self, c: u8) -> usize;
 

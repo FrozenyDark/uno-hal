@@ -66,7 +66,7 @@ impl UsartWorker {
 
         while i == self.tx_tail.read() {
             if Sreg.bits().sreg_i.is_clear() && self.usart.is_buffer_empty() {
-                self.push_bit();
+                self.tx_interrupt();
             }
         }
 
@@ -91,7 +91,7 @@ impl UsartWorker {
                 && self.usart.is_tx_interrupt_enabled()
                 && self.usart.is_buffer_empty()
             {
-                self.push_bit();
+                self.tx_interrupt();
             }
         }
     }
@@ -108,7 +108,7 @@ impl UsartWorker {
         }
     }
 
-    pub(super) fn push_bit(&mut self) {
+    pub(super) fn tx_interrupt(&mut self) {
         let tail = self.tx_tail.read() as usize;
         let bit = self.tx[tail];
         self.tx_tail.update(|x| (x + 1) % SERIAL_TX_BUFFER_SIZE);
@@ -120,18 +120,37 @@ impl UsartWorker {
         }
     }
 
-    pub(super) fn read(&mut self) -> Option<u8> {
-        if self.rx_head.read() == self.rx_tail.read() {
-            return None;
-        }
+    pub(super) fn available(&self) -> usize {
+        let (head, tail) = atomic_block! {
+            (self.rx_head.read() as usize, self.rx_tail.read() as usize)
+        };
+        const SIZE: usize = SERIAL_RX_BUFFER_SIZE as usize;
 
-        let bit = self.rx[self.rx_tail.read() as usize];
-        self.rx_tail.update(|x| (x + 1) % SERIAL_RX_BUFFER_SIZE);
-
-        Some(bit)
+        (SIZE + head - tail) % SIZE
     }
 
-    pub(super) fn pull_bit(&mut self) {
+    pub(super) fn peek(&self) -> Option<u8> {
+        atomic_block! {
+            if self.rx_head.read() == self.rx_tail.read() {
+                None
+            } else {
+                Some(self.rx[self.rx_tail.read() as usize])
+            }
+        }
+    }
+
+    pub(super) fn read(&mut self) -> Option<u8> {
+        if let Some(bit) = self.peek() {
+            atomic_block! {
+                self.rx_tail.update(|x| (x + 1) % SERIAL_RX_BUFFER_SIZE);
+            }
+            Some(bit)
+        } else {
+            None
+        }
+    }
+
+    pub(super) fn rx_interrupt(&mut self) {
         if self.usart.parity_error() {
             let _ = self.usart.read_bit();
         }
