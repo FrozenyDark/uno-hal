@@ -5,15 +5,17 @@ use crate::{
     usart::Usart0,
 };
 
-pub mod addr;
 pub mod analog;
-pub mod bit;
 pub mod delay_loop;
 pub mod gpio;
 mod macros;
+pub mod register;
 pub mod status;
 pub mod timers;
 pub mod usart;
+
+// pub use addr;
+// pub use reg;
 
 static mut TOOK_PERIPHERALS: bool = false;
 

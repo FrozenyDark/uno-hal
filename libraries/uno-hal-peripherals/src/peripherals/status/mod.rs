@@ -3,6 +3,8 @@ mod registers;
 use core::arch::asm;
 pub use registers::*;
 
+use crate::register::RegRW;
+
 #[inline]
 pub unsafe fn enable_interrupts() {
     asm!("sei");
@@ -16,7 +18,7 @@ pub unsafe fn disable_interrupts() {
 #[macro_export]
 macro_rules! atomic_block {
     ($($f:tt)*) => {{
-        use $crate::{addr::{RO, RW}, status::{disable_interrupts, Sreg}};
+        use $crate::{register::{RO, RW}, status::{disable_interrupts, Sreg}};
 
         let __old_sreg = Sreg::REG.read();
         unsafe { disable_interrupts() }
@@ -25,4 +27,16 @@ macro_rules! atomic_block {
 
         __res
     }};
+}
+
+pub struct Status;
+
+impl Status {
+    pub const unsafe fn reg() -> RegRW<u8> {
+        Sreg::REG
+    }
+
+    pub fn interrupts() -> bool {
+        Sreg::new().is_set_bit(SregBits::I)
+    }
 }

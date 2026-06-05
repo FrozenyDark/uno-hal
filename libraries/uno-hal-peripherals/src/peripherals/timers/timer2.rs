@@ -1,12 +1,9 @@
-use crate::{
-    addr::RW8,
-    timers::registers::{
-        ocr::{Ocr2A, Ocr2B},
-        tccr::{Tccr2A, Tccr2B},
-        tcnt::Tcnt2,
-        tifr::Tifr2,
-        timsk::Timsk2,
-    },
+use crate::timers::registers::{
+    ocr::{Ocr2A, Ocr2B},
+    tccr::{Tccr2A, Tccr2B},
+    tcnt::Tcnt2,
+    tifr::Tifr2,
+    timsk::Timsk2,
 };
 
 pub struct Timer2 {
@@ -59,16 +56,12 @@ impl Timer2 {
 
     #[inline]
     pub fn setup_wgm(&mut self, setting: WGMode2) {
-        let mask = setting as u8;
-
-        unsafe { self.tccr2a.reg_mut().set_mask(mask) };
+        unsafe { self.tccr2a.set(setting as u8) };
     }
 
     #[inline]
     pub fn setup_clock(&mut self, setting: ClockSelect2) {
-        let mask = setting as u8;
-
-        unsafe { self.tccr2b.reg_mut().set_mask(mask) };
+        unsafe { self.tccr2b.set(setting as u8) };
     }
 
     #[inline]

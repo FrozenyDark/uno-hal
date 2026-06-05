@@ -1,11 +1,11 @@
 use crate::peripherals::gpio::generic::GenericPin;
 use uno_hal_peripherals::{
-    addr::{RO8, RW8},
     atomic_block,
     gpio::{
         pins::*,
         ports::{PortB, PortC, PortD},
     },
+    register::{BitRO, BitRW},
 };
 
 macro_rules! init_digital {
@@ -16,40 +16,37 @@ macro_rules! init_digital {
                 let mut port = unsafe { $port::take() };
 
                 atomic_block! {
-                    port.$mode.clear($bit);
+                    port.$mode.clear_bit($bit);
                     match pullup {
-                        true => port.$write.set($bit),
-                        false => port.$write.clear($bit),
+                        true => port.$write.set_bit($bit),
+                        false => port.$write.clear_bit($bit),
                     }
                 };
             }
 
             #[inline]
             unsafe fn to_output(&mut self) {
-                atomic_block! { $port::take().$mode.set($bit) };
+                atomic_block! { $port::take().$mode.set_bit($bit) };
             }
 
             #[inline]
             fn input_get(&self) -> bool {
-                unsafe { $port::take().$read.is_set($bit) }
+                unsafe { $port::take().$read.is_set_bit($bit) }
             }
 
             #[inline]
             unsafe fn output_set(&mut self) {
-                atomic_block! { $port::take().$write.set($bit) };
+                atomic_block! { $port::take().$write.set_bit($bit) };
             }
 
             #[inline]
             unsafe fn output_clear(&mut self) {
-                atomic_block! { $port::take().$write.clear($bit) };
+                atomic_block! { $port::take().$write.clear_bit($bit) };
             }
 
             #[inline]
             fn erase(self) -> ErasedPin {
-                ErasedPin {
-                    bit: $bit,
-                    port: unsafe { $port::take().erase() },
-                }
+                self.erase()
             }
         }
     };
@@ -82,32 +79,32 @@ impl GenericPin for ErasedPin {
     #[inline]
     unsafe fn to_input(&mut self, pullup: bool) {
         atomic_block! {
-            self.port.ddr.clear(self.bit);
+            self.port.ddr.clear(self.mask);
             match pullup {
-                true => self.port.port.set(self.bit),
-                false => self.port.port.clear(self.bit),
+                true => self.port.port.set(self.mask),
+                false => self.port.port.clear(self.mask),
             }
         };
     }
 
     #[inline]
     unsafe fn to_output(&mut self) {
-        atomic_block! { self.port.ddr.set(self.bit) };
+        atomic_block! { self.port.ddr.set(self.mask) };
     }
 
     #[inline]
     fn input_get(&self) -> bool {
-        self.port.pin.is_set(self.bit)
+        self.port.pin.is_set(self.mask)
     }
 
     #[inline]
     unsafe fn output_set(&mut self) {
-        atomic_block! { self.port.port.set(self.bit) };
+        atomic_block! { self.port.port.set(self.mask) };
     }
 
     #[inline]
     unsafe fn output_clear(&mut self) {
-        atomic_block! { self.port.port.clear(self.bit) };
+        atomic_block! { self.port.port.clear(self.mask) };
     }
 
     #[inline]

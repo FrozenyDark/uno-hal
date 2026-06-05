@@ -1,28 +1,30 @@
-mod bits;
+use crate::{
+    init_bits, init_register,
+    register::{BitRO, BitRW, RegRO, RegRW},
+};
 
-use crate::{addr::RegRW, bit::Bit};
-pub use bits::*;
-
-/// AVR Status Register
-pub struct Sreg;
-
-impl Sreg {
-    pub const REG: RegRW<u8> = RegRW::new_io8::<0x3F>();
-
-    pub const fn reg(self) -> RegRW<u8> {
-        Self::REG
+init_bits! {
+    SregBits {
+        #[doc = "Carry Flag"]
+        C = 0,
+        #[doc = "Zero Flag"]
+        Z = 1,
+        #[doc = "Negative Flag"]
+        N = 2,
+        #[doc = "Two's complement Overflow Flag"]
+        V = 3,
+        #[doc = "Sign Bit, `s` = `n` XOR `v`"]
+        S = 4,
+        #[doc = "Half Carry Flag"]
+        H = 5,
+        #[doc = "Bit Copy Flag"]
+        T = 6,
+        #[doc = "Global Interrupt Enable"]
+        I = 7,
     }
+}
 
-    pub const fn bits(self) -> SregBits {
-        SregBits {
-            sreg_c: Bit::new(Self.reg()),
-            sreg_z: Bit::new(Self.reg()),
-            sreg_n: Bit::new(Self.reg()),
-            sreg_v: Bit::new(Self.reg()),
-            sreg_s: Bit::new(Self.reg()),
-            sreg_h: Bit::new(Self.reg()),
-            sreg_t: Bit::new(Self.reg()),
-            sreg_i: Bit::new(Self.reg()),
-        }
-    }
+init_register! {
+    #[doc = "AVR Status Register"]
+    Sreg: RegRW<u8> = new_io8(0x3F) + SregBits;
 }

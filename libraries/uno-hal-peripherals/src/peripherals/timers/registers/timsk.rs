@@ -1,61 +1,52 @@
-use core::marker::PhantomData;
-
 use crate::{
-    addr::{RegRO, RegRW},
-    bit::Bit,
-    init_register,
+    init_bits, init_register,
+    register::{BitRO, BitRW, RegRO, RegRW},
 };
 
-pub struct Timsk0 {
-    /// Timer/Counter Output Overflow Interrupt Enable
-    pub toie0: Bit<RegRW<u8>, 0>,
-    /// Timer/Counter Output Compare Match A Interrupt Enable
-    pub ocie0a: Bit<RegRW<u8>, 1>,
-    /// Timer/Counter Output Compare Match B Interrupt Enable
-    pub ocie0b: Bit<RegRW<u8>, 2>,
-    _p: PhantomData<*const ()>,
+init_bits! {
+    Timsk0Bits {
+        #[doc = "Timer/Counter Output Overflow Interrupt Enable"]
+        TOIE0 = 0,
+        #[doc = "Timer/Counter Output Compare Match A Interrupt Enable"]
+        OCIE0A = 1,
+        #[doc = "Timer/Counter Output Compare Match B Interrupt Enable"]
+        OCIE0B = 2,
+    }
 }
 
-pub struct Timsk1 {
-    /// Timer/Counter Output Overflow Interrupt Enable
-    pub toie1: Bit<RegRW<u8>, 0>,
-    /// Timer/Counter Output Compare Match A Interrupt Enable
-    pub ocie1a: Bit<RegRW<u8>, 1>,
-    /// Timer/Counter Output Compare Match B Interrupt Enable
-    pub ocie1b: Bit<RegRW<u8>, 2>,
-    _p: PhantomData<*const ()>,
+init_bits! {
+    Timsk1Bits {
+        #[doc = "Timer/Counter Output Overflow Interrupt Enable"]
+        TOIE1 = 0,
+        #[doc = "Timer/Counter Output Compare Match A Interrupt Enable"]
+        OCIE1A = 1,
+        #[doc = "Timer/Counter Output Compare Match B Interrupt Enable"]
+        OCIE1B = 2,
+    }
 }
 
-pub struct Timsk2 {
-    /// Timer/Counter Output Overflow Interrupt Enable
-    pub toie2: Bit<RegRW<u8>, 0>,
-    /// Timer/Counter Output Compare Match A Interrupt Enable
-    pub ocie2a: Bit<RegRW<u8>, 1>,
-    /// Timer/Counter Output Compare Match B Interrupt Enable
-    pub ocie2b: Bit<RegRW<u8>, 2>,
-    _p: PhantomData<*const ()>,
+init_bits! {
+    Timsk2Bits {
+        #[doc = "Timer/Counter Output Overflow Interrupt Enable"]
+        TOIE2 = 0,
+        #[doc = "Timer/Counter Output Compare Match A Interrupt Enable"]
+        OCIE2A = 1,
+        #[doc = "Timer/Counter Output Compare Match B Interrupt Enable"]
+        OCIE2B = 2,
+    }
 }
 
-init_register!(
-    Timsk0: RegRW<u8> = new_mem8(0x6E) {
-        toie0,
-        ocie0a,
-        ocie0b
-    }
-);
+init_register! {
+    #[doc = "Timer/Counter 0 Interrupt Mask"]
+    Timsk0: RegRW<u8> = new_mem8(0x6E) + Timsk0Bits;
+}
 
-init_register!(
-    Timsk1: RegRW<u8> = new_mem8(0x6F) {
-        toie1,
-        ocie1a,
-        ocie1b
-    }
-);
+init_register! {
+    #[doc = "Timer/Counter 1 Interrupt Mask"]
+    Timsk1: RegRW<u8> = new_mem8(0x6F) + Timsk1Bits;
+}
 
-init_register!(
-    Timsk2: RegRW<u8> = new_mem8(0x70) {
-        toie2,
-        ocie2a,
-        ocie2b
-    }
-);
+init_register! {
+    #[doc = "Timer/Counter 2 Interrupt Mask"]
+    Timsk2: RegRW<u8> = new_mem8(0x70) + Timsk2Bits;
+}

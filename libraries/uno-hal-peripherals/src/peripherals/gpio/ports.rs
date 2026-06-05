@@ -1,6 +1,6 @@
 use crate::{
-    addr::{RegRO, RegRW},
     peripherals::gpio::pins::*,
+    register::{RegRO, RegRW},
 };
 
 pub struct PortDPins {
@@ -33,38 +33,38 @@ pub struct PortCPins {
 }
 
 pub struct PortD {
-    /// Pin input register
+    #[doc = "Pin input register"]
     pub pind: RegRO<u8>,
-    /// Pin mode register
+    #[doc = "Pin mode register"]
     pub ddrd: RegRW<u8>,
-    /// Pin output register
+    #[doc = "Pin output register"]
     pub portd: RegRW<u8>,
 }
 
 pub struct PortB {
-    /// Pin input register
+    #[doc = "Pin input register"]
     pub pinb: RegRO<u8>,
-    /// Pin mode register
+    #[doc = "Pin mode register"]
     pub ddrb: RegRW<u8>,
-    /// Pin output register
+    #[doc = "Pin output register"]
     pub portb: RegRW<u8>,
 }
 
 pub struct PortC {
-    /// Pin input register
+    #[doc = "Pin input register"]
     pub pinc: RegRO<u8>,
-    /// Pin mode register
+    #[doc = "Pin mode register"]
     pub ddrc: RegRW<u8>,
-    /// Pin output register
+    #[doc = "Pin output register"]
     pub portc: RegRW<u8>,
 }
 
 pub struct ErasedPort {
-    /// Pin input register
+    #[doc = "Pin input register"]
     pub pin: RegRO<u8>,
-    /// Pin mode register
+    #[doc = "Pin mode register"]
     pub ddr: RegRW<u8>,
-    /// Pin output register
+    #[doc = "Pin output register"]
     pub port: RegRW<u8>,
 }
 

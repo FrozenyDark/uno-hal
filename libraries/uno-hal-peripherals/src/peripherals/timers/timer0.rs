@@ -1,12 +1,9 @@
-use crate::{
-    addr::RW8,
-    timers::registers::{
-        ocr::{Ocr0A, Ocr0B},
-        tccr::{Tccr0A, Tccr0B},
-        tcnt::Tcnt0,
-        tifr::Tifr0,
-        timsk::Timsk0,
-    },
+use crate::timers::registers::{
+    ocr::{Ocr0A, Ocr0B},
+    tccr::{Tccr0A, Tccr0B},
+    tcnt::Tcnt0,
+    tifr::Tifr0,
+    timsk::{Timsk0, Timsk0Bits},
 };
 
 pub struct Timer0 {
@@ -59,21 +56,17 @@ impl Timer0 {
 
     #[inline]
     pub fn setup_wgm(&mut self, setting: WGMode0) {
-        let mask = setting as u8;
-
-        unsafe { self.tccr0a.reg_mut().set_mask(mask) };
+        unsafe { self.tccr0a.set(setting as u8) };
     }
 
     #[inline]
     pub fn setup_clock(&mut self, setting: ClockSelect0) {
-        let mask = setting as u8;
-
-        unsafe { self.tccr0b.reg_mut().set_mask(mask) };
+        unsafe { self.tccr0b.set(setting as u8) };
     }
 
     #[inline]
     pub fn enable_overflow_interrupt(&mut self) {
-        unsafe { self.timsk0.toie0.set() };
+        unsafe { self.timsk0.set_bit(Timsk0Bits::TOIE0) };
     }
 
     #[inline]

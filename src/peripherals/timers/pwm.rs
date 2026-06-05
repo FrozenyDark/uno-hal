@@ -1,6 +1,9 @@
 use uno_hal_peripherals::{
-    addr::RW,
-    timers::{Timer0, Timer1, Timer2},
+    register::RW,
+    timers::{
+        registers::tccr::{Tccr0ABits, Tccr1ABits, Tccr2ABits},
+        Timer0, Timer1, Timer2,
+    },
 };
 
 pub trait TimerPWM {
@@ -15,26 +18,26 @@ pub trait TimerPWM {
 }
 
 macro_rules! impl_pwm {
-    ($name:ident($tccr:ident, $com_a:ident, $com_b:ident, $ocr_a:ident, $ocr_b: ident): $type:ty) => {
+    ($name:ident($tccr:ident, $bits:ident::($com_a:ident, $com_b:ident), $ocr_a:ident, $ocr_b: ident): $type:ty) => {
         impl TimerPWM for $name {
             #[inline]
             unsafe fn set_pwm_a(&mut self) {
-                self.$tccr.$com_a.set();
+                self.$tccr.set_bit($bits::$com_a);
             }
 
             #[inline]
             unsafe fn clear_pwm_a(&mut self) {
-                self.$tccr.$com_a.clear();
+                self.$tccr.clear_bit($bits::$com_a);
             }
 
             #[inline]
             unsafe fn set_pwm_b(&mut self) {
-                self.$tccr.$com_b.set();
+                self.$tccr.set_bit($bits::$com_b);
             }
 
             #[inline]
             unsafe fn clear_pwm_b(&mut self) {
-                self.$tccr.$com_b.clear();
+                self.$tccr.clear_bit($bits::$com_b);
             }
 
             #[inline]
@@ -50,6 +53,6 @@ macro_rules! impl_pwm {
     };
 }
 
-impl_pwm!(Timer0(tccr0a, com0a1, com0b1, ocr0a, ocr0b): u8);
-impl_pwm!(Timer1(tccr1a, com1a1, com1b1, ocr1a, ocr1b): u16);
-impl_pwm!(Timer2(tccr2a, com2a1, com2b1, ocr2a, ocr2b): u8);
+impl_pwm!(Timer0(tccr0a, Tccr0ABits::(COM0A1, COM0B1), ocr0a, ocr0b): u8);
+impl_pwm!(Timer1(tccr1a, Tccr1ABits::(COM1A1, COM1B1), ocr1a, ocr1b): u16);
+impl_pwm!(Timer2(tccr2a, Tccr2ABits::(COM2A1, COM2B1), ocr2a, ocr2b): u8);

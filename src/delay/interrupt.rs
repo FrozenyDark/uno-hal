@@ -49,15 +49,4 @@ impl TimerCounter {
 #[crate::interrupt(atmega328p)]
 unsafe fn TIMER0_OVF() {
     TIMER0_COUNTER.add_overflow();
-    // let mut ms = TIMER0_MS.wrapping_add(MS_INC);
-    // let mut fract = TIMER0_FRACT + FRACT_INC;
-
-    // if fract >= FRACT_MAX {
-    //     fract -= FRACT_MAX;
-    //     ms = ms.wrapping_add(1);
-    // }
-
-    // TIMER0_FRACT = fract;
-    // TIMER0_MS = ms;
-    // TIMER0_OVERFLOW_COUNT = TIMER0_OVERFLOW_COUNT.wrapping_add(1);
 }

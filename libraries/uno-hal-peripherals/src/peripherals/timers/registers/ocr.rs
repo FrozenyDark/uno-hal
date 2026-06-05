@@ -1,33 +1,34 @@
-use core::marker::PhantomData;
-
 use crate::{
-    addr::{RegRO, RegRW},
     init_register,
+    register::{RegRO, RegRW},
 };
 
-/// Output Compare Register A
-pub struct Ocr0A(PhantomData<*const ()>);
+init_register! {
+    #[doc = "Output Compare Register 0 A"]
+    Ocr0A: RegRW<u8> = new_io8(0x27);
+}
 
-/// Output Compare Register B
-pub struct Ocr0B(PhantomData<*const ()>);
+init_register! {
+    #[doc = "Output Compare Register 0 B"]
+    Ocr0B: RegRW<u8> = new_io8(0x28);
+}
 
-/// Output Compare Register A
-pub struct Ocr1A(PhantomData<*const ()>);
+init_register! {
+    #[doc = "Output Compare Register 1 A"]
+    Ocr1A: RegRW<u16> = new_mem16(0x88);
+}
 
-/// Output Compare Register B
-pub struct Ocr1B(PhantomData<*const ()>);
+init_register! {
+    #[doc = "Output Compare Register 1 B"]
+    Ocr1B: RegRW<u16> = new_mem16(0x8A);
+}
 
-/// Output Compare Register A
-pub struct Ocr2A(PhantomData<*const ()>);
+init_register! {
+    #[doc = "Output Compare Register 2 A"]
+    Ocr2A: RegRW<u8> = new_mem8(0xB3);
+}
 
-/// Output Compare Register B
-pub struct Ocr2B(PhantomData<*const ()>);
-
-init_register!(Ocr0A: RegRW<u8> = new_io8(0x27));
-init_register!(Ocr0B: RegRW<u8> = new_io8(0x28));
-
-init_register!(Ocr1A: RegRW<u16> = new_mem16(0x88));
-init_register!(Ocr1B: RegRW<u16> = new_mem16(0x8A));
-
-init_register!(Ocr2A: RegRW<u8> = new_mem8(0xB3));
-init_register!(Ocr2B: RegRW<u8> = new_mem8(0xB4));
+init_register! {
+    #[doc = "Output Compare Register 2 B"]
+    Ocr2B: RegRW<u8> = new_mem8(0xB4);
+}

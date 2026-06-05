@@ -14,7 +14,7 @@ macro_rules! make_pin {
             pub const fn erase(self) -> ErasedPin {
                 ErasedPin {
                     port: $port::new().erase(),
-                    bit: $pin,
+                    mask: 1 << $pin,
                 }
             }
         }
@@ -46,5 +46,5 @@ make_pin!(PC5: PortC = 5); // 19, A5
 
 pub struct ErasedPin {
     pub port: ErasedPort,
-    pub bit: u8,
+    pub mask: u8,
 }

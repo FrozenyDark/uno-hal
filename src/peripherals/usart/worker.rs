@@ -1,4 +1,8 @@
-use uno_hal_peripherals::{atomic_block, status::Sreg, usart::Usart0};
+use uno_hal_peripherals::{
+    atomic_block,
+    status::Status,
+    usart::{USARTSettings, Usart0},
+};
 
 use crate::volatile_cell::VolatileCell;
 
@@ -38,8 +42,8 @@ impl UsartWorker {
     }
 
     #[inline]
-    pub(super) fn begin(&mut self, baud: u32) {
-        self.usart.set_baud(baud);
+    pub(super) fn begin(&mut self, settings: USARTSettings) {
+        self.usart.set_baud(settings);
         self.usart.set_format();
         self.usart.enable_receive();
         self.usart.enable_transmit();
@@ -47,8 +51,8 @@ impl UsartWorker {
         self.usart.set_tx_interrupt(false);
     }
 
-    pub(super) fn write(&mut self, bit: u8) -> usize {
-        if bit == 0 {
+    pub(super) fn write(&mut self, byte: u8) -> usize {
+        if byte == 0 {
             return 0;
         }
 
@@ -56,7 +60,7 @@ impl UsartWorker {
 
         if self.tx_head.read() == self.tx_tail.read() && self.usart.is_buffer_empty() {
             atomic_block! {
-                self.usart.write_bit(bit);
+                self.usart.write_byte(byte);
             }
 
             return 1;
@@ -65,13 +69,13 @@ impl UsartWorker {
         let i = (self.tx_head.read() + 1) % SERIAL_TX_BUFFER_SIZE;
 
         while i == self.tx_tail.read() {
-            if Sreg.bits().sreg_i.is_clear() && self.usart.is_buffer_empty() {
+            if !Status::interrupts() && self.usart.is_buffer_empty() {
                 self.tx_interrupt();
             }
         }
 
         let head = self.tx_head.read() as usize;
-        self.tx[head] = bit;
+        self.tx[head] = byte;
 
         atomic_block! {
             self.tx_head.write(i);
@@ -87,7 +91,7 @@ impl UsartWorker {
         }
 
         while self.usart.is_tx_interrupt_enabled() || !self.usart.is_tx_completed() {
-            if Sreg.bits().sreg_i.is_clear()
+            if !Status::interrupts()
                 && self.usart.is_tx_interrupt_enabled()
                 && self.usart.is_buffer_empty()
             {
@@ -110,10 +114,10 @@ impl UsartWorker {
 
     pub(super) fn tx_interrupt(&mut self) {
         let tail = self.tx_tail.read() as usize;
-        let bit = self.tx[tail];
+        let byte = self.tx[tail];
         self.tx_tail.update(|x| (x + 1) % SERIAL_TX_BUFFER_SIZE);
 
-        self.usart.write_bit(bit);
+        self.usart.write_byte(byte);
 
         if self.tx_head.read() == self.tx_tail.read() {
             self.usart.set_tx_interrupt(false);
@@ -140,11 +144,11 @@ impl UsartWorker {
     }
 
     pub(super) fn read(&mut self) -> Option<u8> {
-        if let Some(bit) = self.peek() {
+        if let Some(byte) = self.peek() {
             atomic_block! {
                 self.rx_tail.update(|x| (x + 1) % SERIAL_RX_BUFFER_SIZE);
             }
-            Some(bit)
+            Some(byte)
         } else {
             None
         }
@@ -152,14 +156,14 @@ impl UsartWorker {
 
     pub(super) fn rx_interrupt(&mut self) {
         if self.usart.parity_error() {
-            let _ = self.usart.read_bit();
+            let _ = self.usart.read_byte();
         }
 
-        let bit = self.usart.read_bit();
+        let byte = self.usart.read_byte();
         let i = (self.rx_head.read() + 1) % SERIAL_RX_BUFFER_SIZE;
 
         if i != self.rx_tail.read() {
-            self.rx[self.rx_head.read() as usize] = bit;
+            self.rx[self.rx_head.read() as usize] = byte;
             self.rx_head.write(i);
         }
     }

@@ -9,15 +9,15 @@ use crate::peripherals::usart::{
     writable::Writable,
 };
 use core::marker::PhantomData;
-use uno_hal_peripherals::usart::Usart0;
+use uno_hal_peripherals::usart::{USARTSettings, Usart0};
 
 pub struct HwSerial(PhantomData<*const ()>);
 
 impl HwSerial {
     #[inline]
-    pub fn new(usart: Usart0, baud: u32) -> Self {
+    pub fn new(usart: Usart0, settings: USARTSettings) -> Self {
         UsartWorker::create(usart);
-        unsafe { USART_WORKER.as_mut().unwrap().begin(baud) };
+        unsafe { USART_WORKER.as_mut().unwrap().begin(settings) };
 
         Self(PhantomData)
     }
