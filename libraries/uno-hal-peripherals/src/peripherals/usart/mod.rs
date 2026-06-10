@@ -64,18 +64,27 @@ impl Usart0 {
     }
 
     #[inline]
-    pub fn enable_receive(&mut self) {
-        unsafe { self.ucsr0b.set_bit(Ucsr0BBits::RXEN0) };
+    pub fn set_receive(&mut self, state: bool) {
+        match state {
+            true => unsafe { self.ucsr0b.set_bit(Ucsr0BBits::RXEN0) },
+            false => unsafe { self.ucsr0b.clear_bit(Ucsr0BBits::RXEN0) },
+        }
     }
 
     #[inline]
-    pub fn enable_transmit(&mut self) {
-        unsafe { self.ucsr0b.set_bit(Ucsr0BBits::TXEN0) };
+    pub fn set_transmit(&mut self, state: bool) {
+        match state {
+            true => unsafe { self.ucsr0b.set_bit(Ucsr0BBits::TXEN0) },
+            false => unsafe { self.ucsr0b.clear_bit(Ucsr0BBits::TXEN0) },
+        }
     }
 
     #[inline]
-    pub fn enable_rx_interrupt(&mut self) {
-        unsafe { self.ucsr0b.set_bit(Ucsr0BBits::RXCIE0) };
+    pub fn set_rx_interrupt(&mut self, state: bool) {
+        match state {
+            true => unsafe { self.ucsr0b.set_bit(Ucsr0BBits::RXCIE0) },
+            false => unsafe { self.ucsr0b.clear_bit(Ucsr0BBits::RXCIE0) },
+        }
     }
 
     #[inline]

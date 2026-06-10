@@ -14,9 +14,6 @@ pub mod status;
 pub mod timers;
 pub mod usart;
 
-// pub use addr;
-// pub use reg;
-
 static mut TOOK_PERIPHERALS: bool = false;
 
 pub struct Peripherals {

@@ -45,10 +45,25 @@ impl UsartWorker {
     pub(super) fn begin(&mut self, settings: USARTSettings) {
         self.usart.set_baud(settings);
         self.usart.set_format();
-        self.usart.enable_receive();
-        self.usart.enable_transmit();
-        self.usart.enable_rx_interrupt();
+        self.usart.set_receive(true);
+        self.usart.set_transmit(true);
+        self.usart.set_rx_interrupt(true);
         self.usart.set_tx_interrupt(false);
+    }
+
+    #[inline]
+    pub(super) fn stop(&mut self) {
+        self.flush();
+
+        self.usart.set_receive(false);
+        self.usart.set_transmit(false);
+        self.usart.set_rx_interrupt(false);
+        self.usart.set_tx_interrupt(false);
+    }
+
+    #[inline]
+    pub(super) fn free(self) -> Usart0 {
+        self.usart
     }
 
     pub(super) fn write(&mut self, byte: u8) -> usize {

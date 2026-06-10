@@ -23,8 +23,11 @@ impl HwSerial {
     }
 
     #[inline]
-    pub fn read(&self) -> Option<u8> {
-        unsafe { USART_WORKER.as_mut().unwrap().read() }
+    pub fn end(self) -> Option<Usart0> {
+        unsafe { USART_WORKER.as_mut().unwrap().stop() };
+        let worker = unsafe { USART_WORKER.take() };
+
+        worker.map(|x| x.free())
     }
 }
 
