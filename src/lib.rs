@@ -11,4 +11,4 @@ pub mod volatile_cell;
 
 pub use delay::*;
 pub use uno_hal_macro::{entry, interrupt};
-pub use uno_hal_peripherals::Peripherals;
+pub use uno_hal_peripherals::*;
