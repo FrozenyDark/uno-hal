@@ -21,7 +21,7 @@ impl Default for USARTSettings {
     fn default() -> Self {
         Self {
             baud: 57600,
-            double_speed: true,
+            double_speed: false,
         }
     }
 }
