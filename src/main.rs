@@ -1,22 +1,19 @@
 #![no_std]
 #![no_main]
 
-use uno_hal::{
-    pins::{digital_write, pin_mode, Mode},
-    time::delay,
-};
+use uno_hal::{delay_ms, make_pins, Peripherals};
 
 #[uno_hal::entry]
 fn main() -> ! {
-    uno_hal::init!();
+    let p = Peripherals::take_init().unwrap();
+    let pins = make_pins!(p);
 
-    let pin: u8 = 13;
-    pin_mode(pin, Mode::Output).unwrap();
+    let mut pin = pins.d13.into_output();
+    let mut state = true;
 
     loop {
-        digital_write(pin, true).unwrap();
-        delay(200);
-        digital_write(pin, false).unwrap();
-        delay(200);
+        pin.set(state);
+        state = !state;
+        delay_ms(1000);
     }
 }
