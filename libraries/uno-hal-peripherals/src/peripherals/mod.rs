@@ -1,5 +1,6 @@
 use crate::{
     analog::Analog,
+    eeprom::Eeprom,
     gpio::ports::{PortB, PortC, PortD},
     timers::{Timer0, Timer1, Timer2},
     usart::Usart0,
@@ -7,6 +8,7 @@ use crate::{
 
 pub mod analog;
 pub mod delay_loop;
+pub mod eeprom;
 pub mod gpio;
 mod macros;
 pub mod register;
@@ -25,6 +27,7 @@ pub struct Peripherals {
     pub timer1: Timer1,
     pub timer2: Timer2,
     pub usart0: Usart0,
+    pub eeprom: Eeprom,
 }
 
 unsafe fn init(p: &mut Peripherals) {
@@ -70,6 +73,7 @@ impl Peripherals {
             timer1: Timer1::new(),
             timer2: Timer2::new(),
             usart0: Usart0::new(),
+            eeprom: Eeprom::new(),
         }
     }
 }
