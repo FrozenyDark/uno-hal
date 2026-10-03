@@ -3,6 +3,7 @@
 
 /.vscode
 /.zed
+/.helix
 # Devenv
 .devenv*
 devenv.local.nix

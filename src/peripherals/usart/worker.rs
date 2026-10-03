@@ -1,185 +1,129 @@
-use uno_hal_peripherals::{
-    atomic_block,
-    status::Status,
-    usart::{USARTSettings, Usart0},
-};
+use uno_hal_peripherals::usart::Usart0;
 
 use crate::volatile_cell::VolatileCell;
 
-const SERIAL_RX_BUFFER_SIZE: u8 = 16;
-const SERIAL_TX_BUFFER_SIZE: u8 = 16;
+const BUFFER_SIZE: u8 = 16;
 
-pub(super) static mut USART_WORKER: Option<UsartWorker> = None;
+pub(super) static mut USART_BUFFER: UsartBuffer = UsartBuffer::new();
 
-pub struct UsartWorker {
-    written: bool,
-    usart: Usart0,
+macro_rules! next {
+    ($index:expr) => {
+        ($index + 1) % BUFFER_SIZE
+    };
+}
 
+pub(super) struct UsartBuffer {
     rx_head: VolatileCell<u8>,
     rx_tail: VolatileCell<u8>,
     tx_head: VolatileCell<u8>,
     tx_tail: VolatileCell<u8>,
 
-    rx: [u8; SERIAL_RX_BUFFER_SIZE as usize],
-    tx: [u8; SERIAL_TX_BUFFER_SIZE as usize],
+    rx: [u8; BUFFER_SIZE as usize],
+    tx: [u8; BUFFER_SIZE as usize],
 }
 
-impl UsartWorker {
-    #[inline]
-    pub(super) fn create(usart: Usart0) {
-        let worker = Self {
-            written: false,
-            usart,
+impl UsartBuffer {
+    pub const fn new() -> Self {
+        Self {
             rx_head: VolatileCell::new(0),
             rx_tail: VolatileCell::new(0),
             tx_head: VolatileCell::new(0),
             tx_tail: VolatileCell::new(0),
-            rx: [0; SERIAL_RX_BUFFER_SIZE as usize],
-            tx: [0; SERIAL_TX_BUFFER_SIZE as usize],
-        };
-
-        unsafe { USART_WORKER.replace(worker) };
+            rx: [0; BUFFER_SIZE as usize],
+            tx: [0; BUFFER_SIZE as usize],
+        }
     }
 
     #[inline]
-    pub(super) fn begin(&mut self, settings: USARTSettings) {
-        self.usart.set_baud(settings);
-        self.usart.set_format();
-        self.usart.set_receive(true);
-        self.usart.set_transmit(true);
-        self.usart.set_rx_interrupt(true);
-        self.usart.set_tx_interrupt(false);
+    pub(super) fn is_empty_tx(&self) -> bool {
+        self.tx_head.read() == self.tx_tail.read()
     }
 
     #[inline]
-    pub(super) fn stop(&mut self) {
-        self.flush();
-
-        self.usart.set_receive(false);
-        self.usart.set_transmit(false);
-        self.usart.set_rx_interrupt(false);
-        self.usart.set_tx_interrupt(false);
+    pub(super) fn is_full_tx(&self) -> bool {
+        next!(self.tx_head.read()) == self.tx_tail.read()
     }
 
     #[inline]
-    pub(super) fn free(self) -> Usart0 {
-        self.usart
+    pub(super) fn add_tx(&mut self, byte: u8) {
+        let head = self.tx_head.read();
+
+        self.tx[head as usize] = byte;
+        self.tx_head.write(next!(head));
     }
 
-    pub(super) fn write(&mut self, byte: u8) -> usize {
-        if byte == 0 {
-            return 0;
-        }
-
-        self.written = true;
-
-        if self.tx_head.read() == self.tx_tail.read() && self.usart.is_buffer_empty() {
-            atomic_block! {
-                self.usart.write_byte(byte);
-            }
-
-            return 1;
-        }
-
-        let i = (self.tx_head.read() + 1) % SERIAL_TX_BUFFER_SIZE;
-
-        while i == self.tx_tail.read() {
-            if !Status::interrupts() && self.usart.is_buffer_empty() {
-                self.tx_interrupt();
-            }
-        }
-
-        let head = self.tx_head.read() as usize;
-        self.tx[head] = byte;
-
-        atomic_block! {
-            self.tx_head.write(i);
-            self.usart.set_tx_interrupt(true);
-        }
-
-        1
-    }
-
-    pub(super) fn flush(&mut self) {
-        if !self.written {
-            return;
-        }
-
-        while self.usart.is_tx_interrupt_enabled() || !self.usart.is_tx_completed() {
-            if !Status::interrupts()
-                && self.usart.is_tx_interrupt_enabled()
-                && self.usart.is_buffer_empty()
-            {
-                self.tx_interrupt();
-            }
-        }
-    }
-
-    pub(super) fn available_for_write(&self) -> u8 {
-        let (head, tail) = atomic_block! {
-            (self.tx_head.read(), self.tx_tail.read())
-        };
+    #[inline]
+    pub(super) fn available_tx(&self) -> u8 {
+        let (head, tail) = (self.tx_head.read(), self.tx_tail.read());
 
         if head >= tail {
-            SERIAL_TX_BUFFER_SIZE - 1 - head + tail
+            BUFFER_SIZE - 1 - head + tail
         } else {
             tail - head - 1
         }
     }
 
-    pub(super) fn tx_interrupt(&mut self) {
-        let tail = self.tx_tail.read() as usize;
-        let byte = self.tx[tail];
-        self.tx_tail.update(|x| (x + 1) % SERIAL_TX_BUFFER_SIZE);
+    #[inline]
+    pub(super) fn available_rx(&self) -> u8 {
+        let (head, tail) = (self.rx_head.read(), self.rx_tail.read());
 
-        self.usart.write_byte(byte);
-
-        if self.tx_head.read() == self.tx_tail.read() {
-            self.usart.set_tx_interrupt(false);
-        }
+        (BUFFER_SIZE + head - tail) % BUFFER_SIZE
     }
 
-    pub(super) fn available(&self) -> usize {
-        let (head, tail) = atomic_block! {
-            (self.rx_head.read() as usize, self.rx_tail.read() as usize)
-        };
-        const SIZE: usize = SERIAL_RX_BUFFER_SIZE as usize;
+    #[inline]
+    pub(super) fn peek_rx(&self) -> Option<u8> {
+        let (head, tail) = (self.rx_head.read(), self.rx_tail.read());
 
-        (SIZE + head - tail) % SIZE
-    }
-
-    pub(super) fn peek(&self) -> Option<u8> {
-        atomic_block! {
-            if self.rx_head.read() == self.rx_tail.read() {
-                None
-            } else {
-                Some(self.rx[self.rx_tail.read() as usize])
-            }
-        }
-    }
-
-    pub(super) fn read(&mut self) -> Option<u8> {
-        if let Some(byte) = self.peek() {
-            atomic_block! {
-                self.rx_tail.update(|x| (x + 1) % SERIAL_RX_BUFFER_SIZE);
-            }
-            Some(byte)
-        } else {
+        if head == tail {
             None
+        } else {
+            Some(self.rx[tail as usize])
         }
     }
 
-    pub(super) fn rx_interrupt(&mut self) {
-        if self.usart.parity_error() {
-            let _ = self.usart.read_byte();
+    #[inline]
+    pub(super) fn read_rx(&mut self) -> Option<u8> {
+        let (head, tail) = (self.rx_head.read(), self.rx_tail.read());
+
+        if head == tail {
+            None
+        } else {
+            let tail_next = next!(tail);
+            self.rx_tail.write(tail_next);
+
+            Some(self.rx[tail as usize])
+        }
+    }
+
+    pub(super) fn tx_handler(&mut self, usart: &mut Usart0) {
+        let (head, tail) = (self.tx_head.read(), self.tx_tail.read());
+
+        let byte = self.tx[tail as usize];
+
+        let tail = next!(tail);
+
+        self.tx_tail.write(tail);
+
+        usart.write_byte(byte);
+
+        if head == tail {
+            usart.set_tx_interrupt(false);
+        }
+    }
+
+    pub(super) fn rx_handler(&mut self, usart: &Usart0) {
+        if usart.parity_error() {
+            let _ = usart.read_byte();
         }
 
-        let byte = self.usart.read_byte();
-        let i = (self.rx_head.read() + 1) % SERIAL_RX_BUFFER_SIZE;
+        let (head, tail) = (self.rx_head.read(), self.rx_tail.read());
+        let head_next = next!(head);
 
-        if i != self.rx_tail.read() {
-            self.rx[self.rx_head.read() as usize] = byte;
-            self.rx_head.write(i);
+        let byte = usart.read_byte();
+
+        if head_next != tail {
+            self.rx[head as usize] = byte;
+            self.rx_head.write(head_next);
         }
     }
 }

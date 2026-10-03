@@ -45,6 +45,11 @@ impl Usart0 {
         }
     }
 
+    #[inline]
+    pub unsafe fn take() -> Self {
+        Self::new()
+    }
+
     pub fn set_baud(&mut self, settings: USARTSettings) {
         let mut divider = 8;
 
@@ -123,5 +128,10 @@ impl Usart0 {
     #[inline]
     pub fn parity_error(&self) -> bool {
         self.ucsr0a.is_set_bit(Ucsr0ABits::UPE0)
+    }
+
+    #[inline]
+    pub fn available_to_read(&self) -> bool {
+        self.ucsr0a.is_set_bit(Ucsr0ABits::RXC0)
     }
 }
