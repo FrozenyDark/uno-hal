@@ -1,13 +1,20 @@
-use uno_hal_peripherals::usart::Usart0;
+use uno_hal_peripherals::{status::CriticalSection, usart::Usart0};
 
-use crate::peripherals::usart::worker::USART_BUFFER;
+use crate::peripherals::usart::{
+    worker::{rx_handler, tx_handler},
+    RX_BUFFER, TX_BUFFER,
+};
 
 #[crate::interrupt(atmega328p)]
 unsafe fn USART_UDRE() {
-    USART_BUFFER.tx_handler(&mut Usart0::take());
+    let cs = CriticalSection::new();
+    let mut tx = TX_BUFFER.borrow_ref_mut(cs);
+    tx_handler(&mut Usart0::take(), &mut tx);
 }
 
 #[crate::interrupt(atmega328p)]
 unsafe fn USART_RX() {
-    USART_BUFFER.rx_handler(&mut Usart0::take());
+    let cs = CriticalSection::new();
+    let mut rx = RX_BUFFER.borrow_ref_mut(cs);
+    rx_handler(&Usart0::take(), &mut rx);
 }

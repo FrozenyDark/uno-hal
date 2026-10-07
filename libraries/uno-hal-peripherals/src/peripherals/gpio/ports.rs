@@ -1,6 +1,7 @@
 use crate::{
     peripherals::gpio::pins::*,
     register::{RegRO, RegRW},
+    status::CriticalSection,
 };
 
 pub struct PortDPins {
@@ -78,7 +79,7 @@ impl PortD {
     }
 
     #[inline]
-    pub unsafe fn take() -> Self {
+    pub unsafe fn take<'cs>(_cs: CriticalSection<'cs>) -> Self {
         Self::new()
     }
 
@@ -114,7 +115,7 @@ impl PortB {
     }
 
     #[inline]
-    pub unsafe fn take() -> Self {
+    pub unsafe fn take<'cs>(_cs: CriticalSection<'cs>) -> Self {
         Self::new()
     }
 
@@ -148,7 +149,7 @@ impl PortC {
     }
 
     #[inline]
-    pub unsafe fn take() -> Self {
+    pub unsafe fn take<'cs>(_cs: CriticalSection<'cs>) -> Self {
         Self::new()
     }
 

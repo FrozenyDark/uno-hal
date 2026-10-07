@@ -1,4 +1,9 @@
-use uno_hal_peripherals::F_CPU;
+use core::cell::RefCell;
+
+use uno_hal_peripherals::{
+    status::{CriticalSection, Mutex},
+    F_CPU,
+};
 
 pub(super) const CYCLES_PER_US: u32 = F_CPU / 1_000_000;
 
@@ -13,7 +18,8 @@ const MS_INC: u32 = US_PER_TIMER0_OVERFLOW / 1000;
 const FRACT_INC: u8 = ((US_PER_TIMER0_OVERFLOW % 1000) >> 3) as u8;
 const FRACT_MAX: u8 = (1000 >> 3) as u8;
 
-pub(super) static mut TIMER0_COUNTER: TimerCounter = TimerCounter::new();
+pub(super) static TIMER0_COUNTER: Mutex<RefCell<TimerCounter>> =
+    Mutex::new(RefCell::new(TimerCounter::new()));
 
 pub(super) struct TimerCounter {
     pub overflows: u32,
@@ -48,5 +54,6 @@ impl TimerCounter {
 
 #[crate::interrupt(atmega328p)]
 unsafe fn TIMER0_OVF() {
-    TIMER0_COUNTER.add_overflow();
+    let cs = CriticalSection::new();
+    TIMER0_COUNTER.borrow_ref_mut(cs).add_overflow();
 }

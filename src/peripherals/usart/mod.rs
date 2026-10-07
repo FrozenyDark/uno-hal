@@ -3,10 +3,13 @@ pub mod readable;
 mod worker;
 pub mod writable;
 
-use crate::peripherals::usart::{readable::Readable, worker::USART_BUFFER, writable::Writable};
+use crate::peripherals::usart::{
+    readable::Readable,
+    worker::{tx_handler, RX_BUFFER, TX_BUFFER},
+    writable::Writable,
+};
 use uno_hal_peripherals::{
-    atomic_block,
-    status::Status,
+    status::{atomic_block, Status},
     usart::{USARTSettings, Usart0},
 };
 
@@ -42,34 +45,36 @@ impl HwSerial {
 
         self.usart
     }
+}
 
-    fn write(&mut self, byte: u8) -> usize {
-        if byte == 0 {
+impl Writable for HwSerial {
+    fn write_c(&mut self, c: u8) -> usize {
+        if c == 0 {
             return 0;
         }
 
         self.written = true;
 
-        if unsafe { USART_BUFFER.is_empty_tx() } && self.usart.is_buffer_empty() {
-            atomic_block! {
-                self.usart.write_byte(byte);
+        atomic_block(|cs| {
+            let mut buffer = TX_BUFFER.borrow_ref_mut(cs);
+
+            if buffer.is_empty() && self.usart.is_buffer_empty() {
+                self.usart.write_byte(c);
+
+                return 1;
             }
 
-            return 1;
-        }
+            if buffer.is_full() {
+                while !self.usart.is_buffer_empty() {}
 
-        while unsafe { USART_BUFFER.is_full_tx() } {
-            if !Status::interrupts() && self.usart.is_buffer_empty() {
-                unsafe { USART_BUFFER.tx_handler(&mut self.usart) };
+                tx_handler(&mut self.usart, &mut buffer);
             }
-        }
 
-        atomic_block! {
-            unsafe { USART_BUFFER.add_tx(byte)};
+            buffer.add(c);
             self.usart.set_tx_interrupt(true);
-        }
 
-        1
+            1
+        })
     }
 
     fn flush(&mut self) {
@@ -82,70 +87,33 @@ impl HwSerial {
                 && self.usart.is_tx_interrupt_enabled()
                 && self.usart.is_buffer_empty()
             {
-                unsafe { USART_BUFFER.tx_handler(&mut self.usart) }
+                atomic_block(|cs| {
+                    let mut buffer = TX_BUFFER.borrow_ref_mut(cs);
+                    tx_handler(&mut self.usart, &mut buffer);
+                });
             }
         }
     }
 
     #[inline]
-    fn available_for_write(&self) -> u8 {
-        atomic_block! {
-            unsafe { USART_BUFFER.available_tx() }
-        }
-    }
-
-    #[inline]
-    fn available(&self) -> u8 {
-        atomic_block! {
-            unsafe { USART_BUFFER.available_rx() }
-        }
-    }
-
-    #[inline]
-    fn peek(&self) -> Option<u8> {
-        atomic_block! {
-            unsafe { USART_BUFFER.peek_rx() }
-        }
-    }
-
-    #[inline]
-    fn read(&self) -> Option<u8> {
-        atomic_block! {
-            unsafe { USART_BUFFER.read_rx() }
-        }
-    }
-}
-
-impl Writable for HwSerial {
-    #[inline]
-    fn write_c(&mut self, c: u8) -> usize {
-        self.write(c)
-    }
-
-    #[inline]
-    fn flush(&mut self) {
-        self.flush();
-    }
-
-    #[inline]
     fn available_for_write(&self) -> usize {
-        self.available_for_write() as usize
+        atomic_block(|cs| TX_BUFFER.borrow_ref(cs).count_empty()) as usize
     }
 }
 
 impl Readable for HwSerial {
     #[inline]
     fn peek_c(&self) -> Option<u8> {
-        self.peek()
+        atomic_block(|cs| RX_BUFFER.borrow_ref(cs).peek())
     }
 
     #[inline]
     fn read_c(&self) -> Option<u8> {
-        self.read()
+        atomic_block(|cs| RX_BUFFER.borrow_ref_mut(cs).pop())
     }
 
     #[inline]
     fn available(&self) -> usize {
-        self.available() as usize
+        atomic_block(|cs| RX_BUFFER.borrow_ref(cs).count_filled()) as usize
     }
 }

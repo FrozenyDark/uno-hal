@@ -1,11 +1,11 @@
 use crate::peripherals::gpio::generic::GenericPin;
 use uno_hal_peripherals::{
-    atomic_block,
     gpio::{
         pins::*,
         ports::{PortB, PortC, PortD},
     },
     register::{BitRO, BitRW},
+    status::atomic_block,
 };
 
 macro_rules! init_digital {
@@ -13,35 +13,34 @@ macro_rules! init_digital {
         impl GenericPin for $name {
             #[inline]
             unsafe fn to_input(&mut self, pullup: bool) {
-                let mut port = unsafe { $port::take() };
-
-                atomic_block! {
-                    port.$mode.clear_bit($bit);
+                atomic_block(|cs| {
+                    let mut port = unsafe { $port::take(cs) };
+                    port.$mode.clear_bit(0);
                     match pullup {
-                        true => port.$write.set_bit($bit),
-                        false => port.$write.clear_bit($bit),
+                        true => port.$write.set_bit(0),
+                        false => port.$write.clear_bit(0),
                     }
-                };
+                });
             }
 
             #[inline]
             unsafe fn to_output(&mut self) {
-                atomic_block! { $port::take().$mode.set_bit($bit) };
+                atomic_block(|cs| $port::take(cs).$mode.set_bit($bit));
             }
 
             #[inline]
             fn input_get(&self) -> bool {
-                unsafe { $port::take().$read.is_set_bit($bit) }
+                atomic_block(|cs| unsafe { $port::take(cs).$read.is_set_bit($bit) })
             }
 
             #[inline]
             unsafe fn output_set(&mut self) {
-                atomic_block! { $port::take().$write.set_bit($bit) };
+                atomic_block(|cs| $port::take(cs).$write.set_bit($bit));
             }
 
             #[inline]
             unsafe fn output_clear(&mut self) {
-                atomic_block! { $port::take().$write.clear_bit($bit) };
+                atomic_block(|cs| $port::take(cs).$write.clear_bit($bit));
             }
 
             #[inline]
@@ -78,33 +77,33 @@ init_digital!(PC5, PortC(pinc, ddrc, portc), 5); // Digital Pin 19, Analog Pin 5
 impl GenericPin for ErasedPin {
     #[inline]
     unsafe fn to_input(&mut self, pullup: bool) {
-        atomic_block! {
+        atomic_block(|_| {
             self.port.ddr.clear(self.mask);
             match pullup {
                 true => self.port.port.set(self.mask),
                 false => self.port.port.clear(self.mask),
             }
-        };
+        });
     }
 
     #[inline]
     unsafe fn to_output(&mut self) {
-        atomic_block! { self.port.ddr.set(self.mask) };
+        atomic_block(|_| self.port.ddr.set(self.mask));
     }
 
     #[inline]
     fn input_get(&self) -> bool {
-        self.port.pin.is_set(self.mask)
+        atomic_block(|_| self.port.pin.is_set(self.mask))
     }
 
     #[inline]
     unsafe fn output_set(&mut self) {
-        atomic_block! { self.port.port.set(self.mask) };
+        atomic_block(|_| self.port.port.set(self.mask));
     }
 
     #[inline]
     unsafe fn output_clear(&mut self) {
-        atomic_block! { self.port.port.clear(self.mask) };
+        atomic_block(|_| self.port.port.clear(self.mask));
     }
 
     #[inline]
